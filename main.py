@@ -99,7 +99,6 @@ def train():
             for i, f in enumerate(full_precision):
                 flat_quantized, binary_representation[i] = quantize(
                     bit_precision, weights[i], f.flatten())
-                print('quantized')
                 quantized[i].data = flat_quantized.reshape(quantized[i].size())
                 # binr = torch.where(
                 #     binary_representation[i] > 0, 1, 0).to(torch.float)
