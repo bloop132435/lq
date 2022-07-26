@@ -51,7 +51,7 @@ def quantize(num_bits: int, weights: torch.Tensor, full_precision: torch.Tensor)
     quantized_binary = all_binary_values[indicies.long()]
     return quantized_value, quantized_binary
 
-def old_quantize(num_bits: int, weights: torch.Tensor, full_precision: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+def old_quantize(num_bits: int, weights: torch.Tensor, full_precision: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
     all_binary_values = torch.Tensor(
         list(itertools.product([-1, 1], repeat=num_bits)))
     all_possible_values = torch.matmul(
