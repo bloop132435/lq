@@ -106,8 +106,9 @@ def train():
                 bbtb = torch.matmul(inv,b)
                 intermediate = torch.matmul(bbtb,f.flatten())
                 weights[i] = intermediate
-                print(i)
+                print(i,end='')
                 pass
+            print()
 
             # Forward pass
             outputs = model(images)

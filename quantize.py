@@ -53,9 +53,8 @@ def quantize(num_bits: int, weights: torch.Tensor, full_precision: torch.Tensor)
         orig_mask = torch.where(mse_delta==0,1,0)
         new_indicies = torch.ones_like(flat_precision) * i * new_mask + indicies * orig_mask
         indicies = new_indicies
-    indicies.to(torch.long)
-    quantized_value = all_possible_values[indicies]
-    quantized_binary = all_binary_values[indicies]
+    quantized_value = all_possible_values[indicies.long()]
+    quantized_binary = all_binary_values[indicies.long()]
     return quantized_value, quantized_binary
 
 
