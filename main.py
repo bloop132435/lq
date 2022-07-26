@@ -8,6 +8,7 @@ from quantize import quantize
 device = 'cpu'
 if torch.cuda.is_available():
     device = 'cuda'
+    print('cuda')
 model = torchvision.models.resnet18()
 
 batch_size = 100
