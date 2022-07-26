@@ -83,16 +83,19 @@ weights = [torch.Tensor(powers_of_2.to(torch.float))/constants[i//3]
 num_epochs = 5
 
 
+print("a")
 def train():
     total_step = len(train_loader)
     for epoch in range(num_epochs):
         for index, (images, labels) in enumerate(train_loader):
+            print("b")
             images = images.to(device)
             labels = labels.to(device)
             # TODO, convert full precision to quantized
             # list of 8-long bool list describing each layer
             binary_representation = [torch.Tensor([])
                                      for _ in range(len(quantized))]
+            print("c")
             for i, f in enumerate(full_precision):
                 flat_quantized, binary_representation[i] = quantize(
                     bit_precision, weights[i], f.flatten())
