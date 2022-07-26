@@ -1,3 +1,4 @@
+from typing import Tuple
 from bisect import bisect_left
 import math
 import torch
@@ -23,7 +24,7 @@ def take_closest(myList, myNumber):
         return pos-1
 
 
-def quantize(num_bits: int, weights: torch.Tensor, full_precision: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+def quantize(num_bits: int, weights: torch.Tensor, full_precision: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
     all_binary_values = torch.Tensor(
         list(itertools.product([-1, 1], repeat=num_bits)))
     all_possible_values = torch.matmul(
