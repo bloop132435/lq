@@ -2,8 +2,13 @@ from typing import Tuple
 from bisect import bisect_left
 import math
 import torch
+import numpy as np
 import itertools
 
+device = 'cpu'
+if torch.cuda.is_available():
+    device = 'cuda'
+    print('cuda')
 
 def take_closest(myList, myNumber):
     """
@@ -25,15 +30,15 @@ def take_closest(myList, myNumber):
 
 
 def quantize( num_bits: int, weights: torch.Tensor, full_precision: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
-    all_binary_values = torch.Tensor(
-        list(itertools.product([-1, 1], repeat=num_bits)))
+    #  all_binary_values = torch.from_numpy(np.fromiter((itertools.product([-1,1],repeat=num_bits)),np.float32))
+    all_binary_values = torch.cartesian_prod(*[torch.Tensor([-1,1]) for _ in range(num_bits)])
     all_possible_values = torch.matmul(
         all_binary_values.to(torch.float), weights.to(torch.float))
     flat_precision = torch.clone(full_precision.flatten())
-    min_mse = torch.ones_like(flat_precision) * 10000
+    min_mse = torch.full_like(flat_precision,10000)
     indicies = torch.zeros_like(flat_precision)
     for i in range(2 ** num_bits):
-        value = all_possible_values[i] * torch.ones_like(flat_precision)
+        value = torch.full_like(flat_precision,all_possible_values[i].item())
         mse = (value - flat_precision) ** 2
         new_mse = torch.minimum(mse,min_mse)
         mse_delta = min_mse - new_mse

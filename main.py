@@ -14,7 +14,7 @@ model_q = torchvision.models.resnet18(num_classes = 10)
 model_q = model_q.to(device)
 
 batch_size = 100
-bit_precision = 3
+bit_precision = 4
 
 
 mnist_folder = os.path.join(os.path.dirname(__file__), 'data')
@@ -94,6 +94,7 @@ binary_representation = [torch.Tensor([])
 PERIOD = 1
 def train():
     total_step = len(train_loader)
+    print(' ' * 50,']','\b'*52,flush=True,end='')
     for epoch in range(num_epochs):
         for index, (images, labels) in enumerate(train_loader):
             images = images.to(device)
@@ -116,10 +117,6 @@ def train():
                     bbtb = torch.matmul(inv,b)
                     intermediate = torch.matmul(bbtb,f.flatten())
                     weights[i] = intermediate
-                print('=',end='',flush=True)
-            print('\b' * len(full_precision),end='')
-            print(' ' * len(full_precision),end='')
-            print('\b' * len(full_precision),end='')
 
             optimizer_quantized.zero_grad()
             optimizer_full_precision.zero_grad()
@@ -142,10 +139,14 @@ def train():
             optimizer_full_precision.step()
             optimizer_rest.step()
 
+            if (index+1) %2 == 0:
+                print('=',end='',flush=True)
             if (index+1) % 100 == 0:
+                print()
                 print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
                       .format(epoch+1, num_epochs, index+1, total_step, loss.item()))
                 print(test())
+                print(' ' * 50,']','\b'*52,flush=True,end='')
 #  def train():
     #  total_step = len(train_loader)
     #  for epoch in range(num_epochs):
