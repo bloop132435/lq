@@ -98,8 +98,6 @@ def train():
             # TODO, convert full precision to quantized
             # list of 8-long bool list describing each layer
             for i, f in enumerate(full_precision):
-                l = len(str(i))
-                print(i,end='',flush=True)
                 for _ in range(PERIOD):
                     flat_quantized, binary_representation[i] = quantize(
                         bit_precision, weights[i], f)
@@ -113,8 +111,7 @@ def train():
                     bbtb = torch.matmul(inv,b)
                     intermediate = torch.matmul(bbtb,f.flatten())
                     weights[i] = intermediate
-                print('\b' * l,'#',end='',flush=True)
-                pass
+                print('=',end='',flush=True)
             print()
 
             # Forward pass
@@ -138,7 +135,63 @@ def train():
             if (index+1) % 100 == 0:
                 print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
                       .format(epoch+1, num_epochs, index+1, total_step, loss.item()))
+                print(test())
+class AverageMeter:
+    def __init__(self):
+        self.sum = 0
+        self.avg = 0
+        self.num = 0
+    def update(self,val,cnt):
+        self.sum += val * cnt
+        self.num += cnt
+        self.avg = self.sum/self.num
 
+def test():
+    global best_acc
+    global test_loader
+
+    losses = AverageMeter()
+    top1 = AverageMeter()
+    top5 = AverageMeter()
+
+    # switch to evaluate mode
+    model_q.eval()
+
+    for batch_idx, (inputs, targets) in enumerate(test_loader):
+        # measure data loading time
+        with torch.no_grad():
+            inputs = inputs.to(device)
+            targets = targets.to(device)
+            #inputs, targets = torch.autograd.Variable(inputs), torch.autograd.Variable(targets)
+
+            # compute output
+            outputs = model_q(inputs)
+            loss = criterion(outputs, targets)
+
+        # measure accuracy and record loss
+        prec1, prec5 = accuracy(outputs.data, targets.data, topk=(1, 5))
+        losses.update(loss.data, inputs.size(0))
+        top1.update(prec1, inputs.size(0))
+        top5.update(prec5, inputs.size(0))
+
+        # measure elapsed time
+
+    return (losses.avg, top1.avg,top5.avg)
+
+def accuracy(output, target, topk=(1,)):
+    """Computes the precision@k for the specified values of k"""
+    maxk = max(topk)
+    batch_size = target.size(0)
+
+    _, pred = output.topk(maxk, 1, True, True)
+    pred = pred.t()
+    correct = pred.eq(target.view(1, -1).expand_as(pred))
+
+    res = []
+    for k in topk:
+        correct_k = correct[:k].reshape(-1).float().sum(0)
+        res.append(correct_k.mul_(100.0 / batch_size))
+    return res
 
 
 if __name__ == "__main__":
