@@ -11,6 +11,7 @@ if torch.cuda.is_available():
     device = 'cuda'
     print('cuda')
 model_q = torchvision.models.resnet18()
+model_q = model_q.to(device)
 
 batch_size = 100
 bit_precision = 3
@@ -170,6 +171,7 @@ def test():
 
         # measure accuracy and record loss
         prec1, prec5 = accuracy(outputs.data, targets.data, topk=(1, 5))
+        print(outputs.data,targets.data)
         losses.update(loss.data, inputs.size(0))
         top1.update(prec1, inputs.size(0))
         top5.update(prec5, inputs.size(0))
