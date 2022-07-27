@@ -24,19 +24,11 @@ def take_closest(myList, myNumber):
         return pos-1
 
 
-def quantize(num_bits: int, weights: torch.Tensor, full_precision: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+def quantize( num_bits: int, weights: torch.Tensor, full_precision: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
     all_binary_values = torch.Tensor(
         list(itertools.product([-1, 1], repeat=num_bits)))
     all_possible_values = torch.matmul(
         all_binary_values.to(torch.float), weights.to(torch.float))
-    combo = []
-    for i in range(len(all_binary_values)):
-        item = list([x.item() for x in all_binary_values[i]])
-        item.append(all_possible_values[i].item())
-        combo.append(item)
-    combo = torch.Tensor(combo)
-    all_binary_values = combo[:, :-1]
-    all_possible_values = torch.Tensor(combo[:, -1])
     flat_precision = torch.clone(full_precision.flatten())
     min_mse = torch.ones_like(flat_precision) * 10000
     indicies = torch.zeros_like(flat_precision)
